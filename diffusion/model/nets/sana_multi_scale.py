@@ -21,7 +21,6 @@ from timm.models.layers import DropPath
 
 from diffusion.model.builder import MODELS
 from diffusion.model.nets.basic_modules import DWMlp, GLUMBConv, MBConvPreGLU, Mlp
-from diffusion.model.nets.fastlinear.modules import TritonLiteMLA, TritonMBConvPreGLU
 from diffusion.model.nets.sana import Sana, get_2d_sincos_pos_embed
 from diffusion.model.nets.sana_blocks import (
     Attention,
@@ -74,9 +73,7 @@ class SanaMSBlock(nn.Module):
             self_num_heads = hidden_size // linear_head_dim
             self.attn = LiteLA(hidden_size, hidden_size, heads=self_num_heads, eps=1e-8, qk_norm=qk_norm)
         elif attn_type == "triton_linear":
-            # linear self attention with triton kernel fusion
-            self_num_heads = hidden_size // linear_head_dim
-            self.attn = TritonLiteMLA(hidden_size, num_heads=self_num_heads, eps=1e-8)
+            print("Error, no triton for triton_linear")
         elif attn_type == "vanilla":
             # vanilla self attention
             self.attn = Attention(hidden_size, num_heads=num_heads, qkv_bias=True)
@@ -108,14 +105,7 @@ class SanaMSBlock(nn.Module):
                 dilation=2,
             )
         elif ffn_type == "triton_mbconvpreglu":
-            self.mlp = TritonMBConvPreGLU(
-                in_dim=hidden_size,
-                out_dim=hidden_size,
-                mid_dim=int(hidden_size * mlp_ratio),
-                use_bias=(True, True, False),
-                norm=None,
-                act=("silu", "silu", None),
-            )
+            print("Error, no triton for triton_mbconvpreglu")
         elif ffn_type == "mlp":
             approx_gelu = lambda: nn.GELU(approximate="tanh")
             self.mlp = Mlp(
