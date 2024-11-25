@@ -20,7 +20,7 @@ import torch
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
 
-from ...models.nn.triton_rms_norm import TritonRMSNorm2dFunc
+#from ...models.nn.triton_rms_norm import TritonRMSNorm2dFunc
 from ...models.utils import build_kwargs_from_config
 
 __all__ = ["LayerNorm2d", "TritonRMSNorm2d", "build_norm", "reset_bn", "set_norm_eps"]
