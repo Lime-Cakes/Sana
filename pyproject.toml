@@ -43,7 +43,6 @@ dependencies = [
     "transformers",
     "wandb",
     "webdataset",
-    "xformers==0.0.27.post2",
     "yapf",
     "spaces",
     "matplotlib",
