@@ -8,7 +8,8 @@
   <a href="https://nvlabs.github.io/Sana/"><img src="https://img.shields.io/static/v1?label=Project&message=Github&color=blue&logo=github-pages"></a> &ensp;
   <a href="https://hanlab.mit.edu/projects/sana/"><img src="https://img.shields.io/static/v1?label=Page&message=MIT&color=darkred&logo=github-pages"></a> &ensp;
   <a href="https://arxiv.org/abs/2410.10629"><img src="https://img.shields.io/static/v1?label=Arxiv&message=Sana&color=red&logo=arxiv"></a> &ensp;
-  <a href="https://nv-sana.mit.edu/"><img src="https://img.shields.io/static/v1?label=Demo&message=MIT&color=yellow"></a> &ensp;
+  <a href="https://nv-sana.mit.edu/"><img src="https://img.shields.io/static/v1?label=Demo:8x3090&message=MIT&color=yellow"></a> &ensp;
+  <a href="https://replicate.com/chenxwh/sana"><img src="https://img.shields.io/static/v1?label=API:H100&message=Replicate&color=pink"></a> &ensp;
   <a href="https://discord.gg/rde6eaE5Ta"><img src="https://img.shields.io/static/v1?label=Discuss&message=Discord&color=purple&logo=discord"></a> &ensp;
 </div>
 
@@ -35,6 +36,9 @@ As a result, Sana-0.6B is very competitive with modern giant diffusion model (e.
 
 ## 🔥🔥 News
 
+- (🔥 New) \[2024/11/27\] Sana Replicate API is launching at [Sana-API](https://replicate.com/chenxwh/sana).
+- (🔥 New) \[2024/11/27\] Sana code-base license changed to Apache 2.0.
+- (🔥 New) \[2024/11/26\] 1.6B [Sana multi-linguistic models](https://huggingface.co/Efficient-Large-Model/Sana_1600M_512px_MultiLing) are released. Multi-language(Emoji & Chinese & English) are supported.
 - (🔥 New) \[2024/11\] 1.6B [Sana models](https://huggingface.co/collections/Efficient-Large-Model/sana-673efba2a57ed99843f11f9e) are released.
 - (🔥 New) \[2024/11\] Training & Inference & Metrics code are released.
 - (🔥 New) \[2024/11\] Working on [`diffusers`](https://github.com/huggingface/diffusers/pull/9982).
@@ -110,8 +114,9 @@ cd Sana
 # official online demo
 DEMO_PORT=15432 \
 python app/app_sana.py \
-      --config=configs/sana_config/1024ms/Sana_1600M_img1024.yaml \
-      --model_path=hf://Efficient-Large-Model/Sana_1600M_1024px/checkpoints/Sana_1600M_1024px.pth
+    --share \
+    --config=configs/sana_config/1024ms/Sana_1600M_img1024.yaml \
+    --model_path=hf://Efficient-Large-Model/Sana_1600M_1024px/checkpoints/Sana_1600M_1024px.pth
 ```
 
 ```python
@@ -138,19 +143,38 @@ image = sana(
 save_image(image, 'output/sana.png', nrow=1, normalize=True, value_range=(-1, 1))
 ```
 
+<details>
+<summary><h2>Run Sana (Inference) with Docker</h2></summary>
+
+```
+# Pull related models
+huggingface-cli download google/gemma-2b-it
+huggingface-cli download google/shieldgemma-2b
+huggingface-cli download mit-han-lab/dc-ae-f32c32-sana-1.0
+huggingface-cli download Efficient-Large-Model/Sana_1600M_1024px
+
+# Run with docker
+docker build . -t sana
+docker run --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
+    -v ~/.cache:/root/.cache \
+    sana
+```
+
+</details>
+
 ## 🔛 Run inference with TXT or JSON files
 
 ```bash
 # Run samples in a txt file
 python scripts/inference.py \
       --config=configs/sana_config/1024ms/Sana_1600M_img1024.yaml \
-      --model_path=hf://Efficient-Large-Model/Sana_1600M_1024px/checkpoints/Sana_1600M_1024px.pth
+      --model_path=hf://Efficient-Large-Model/Sana_1600M_1024px/checkpoints/Sana_1600M_1024px.pth \
       --txt_file=asset/samples_mini.txt
 
 # Run samples in a json file
 python scripts/inference.py \
       --config=configs/sana_config/1024ms/Sana_1600M_img1024.yaml \
-      --model_path=hf://Efficient-Large-Model/Sana_1600M_1024px/checkpoints/Sana_1600M_1024px.pth
+      --model_path=hf://Efficient-Large-Model/Sana_1600M_1024px/checkpoints/Sana_1600M_1024px.pth \
       --json_file=asset/samples_mini.json
 ```
 

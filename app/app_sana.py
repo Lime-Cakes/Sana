@@ -115,6 +115,12 @@ NUM_IMAGES_PER_PROMPT = 1
 INFER_SPEED = 0
 
 
+def norm_ip(img, low, high):
+    img.clamp_(min=low, max=high)
+    img.sub_(low).div_(max(high - low, 1e-5))
+    return img
+
+
 def open_db():
     db = sqlite3.connect(COUNTER_DB)
     db.execute("CREATE TABLE IF NOT EXISTS counter(app CHARS PRIMARY KEY UNIQUE, value INTEGER)")
@@ -179,6 +185,7 @@ def get_args():
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--step", default=-1, type=int)
     parser.add_argument("--custom_image_size", default=None, type=int)
+    parser.add_argument("--share", action="store_true")
     parser.add_argument(
         "--shield_model_path",
         type=str,
@@ -284,13 +291,19 @@ def generate(
         img = [save_image_sana(img, seed, save_img=save_image) for img in images]
         print(img)
     else:
-        if num_imgs > 1:
-            nrow = 2
-        else:
-            nrow = 1
-        img = make_grid(images, nrow=nrow, normalize=True, value_range=(-1, 1))
-        img = img.mul(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to("cpu", torch.uint8).numpy()
-        img = [Image.fromarray(img.astype(np.uint8))]
+        img = [
+            Image.fromarray(
+                norm_ip(img, -1, 1)
+                .mul(255)
+                .add_(0.5)
+                .clamp_(0, 255)
+                .permute(1, 2, 0)
+                .to("cpu", torch.uint8)
+                .numpy()
+                .astype(np.uint8)
+            )
+            for img in images
+        ]
 
     torch.cuda.empty_cache()
 
@@ -487,4 +500,4 @@ with gr.Blocks(css=css, title="Sana") as demo:
     )
 
 if __name__ == "__main__":
-    demo.queue(max_size=20).launch(server_name="0.0.0.0", server_port=DEMO_PORT, debug=False, share=False)
+    demo.queue(max_size=20).launch(server_name="0.0.0.0", server_port=DEMO_PORT, debug=False, share=args.share)
